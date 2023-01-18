@@ -26,10 +26,10 @@ export function getElevation(point: Point): Elevation {
 export function getColor(elevation: Elevation): string {
   switch (elevation) {
     case Elevation.High:
-      return "slategray";
+      return "lightgray";
     case Elevation.Middle:
       return "forestgreen";
     case Elevation.Low:
-      return "skyblue";
+      return "dodgerblue";
   }
 }
