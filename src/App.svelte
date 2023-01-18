@@ -3,7 +3,6 @@
   import type { Point } from "./types";
   import { getColor, getElevation, getNeighbors } from "./generation.js";
   import { clamp, clamp1, readLocalStorage, writeLocalStorage } from "./util";
-  import { debounce } from "lodash/fp";
 
   const zoomMax = 20;
   const zoomMin = 1;
