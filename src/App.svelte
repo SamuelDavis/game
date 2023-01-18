@@ -2,7 +2,7 @@
   import { getColor, getElevation, getNeighbors } from "./generation.js";
   import { clamp1 } from "./util";
   import { zoomMax, zoomMin } from "./config";
-  import { position, zoom, gridColumns } from "./store";
+  import { position, zoom, gridColumns, seed, getNoise } from "./store";
 
   function onWheel(e: WheelEvent) {
     $zoom += e.deltaY < 0 ? -1 : 1;
@@ -17,8 +17,13 @@
     }));
   };
 
-  function onResetPosition() {
-    $position = { x: 0, y: 0 };
+  function onReset() {
+    localStorage.clear();
+    window.location.reload();
+  }
+
+  function onChangeSeed() {
+    $seed = prompt("New seed value", $seed) ?? $seed;
   }
 </script>
 
@@ -33,20 +38,24 @@
         min={zoomMin}
         max={zoomMax}
       />
-      <output>{$zoom}</output>
+      <output>{zoomMax - $zoom + 1}</output>
     </label>
-    <button on:click={onResetPosition}>reset</button>
-    <label>
+    <span>
+      Seed: {@html $seed.replace(/\s/g, "&nbsp;")}
+      <button on:click={onChangeSeed}>change</button>
+    </span>
+    <span>
       Position:
       {JSON.stringify($position)}
-    </label>
+      <button on:click={onReset}>reset</button>
+    </span>
   </header>
 
   <hr />
 
   <ol style={`--grid-columns:${$gridColumns};`} on:pointermove={onPan}>
     {#each Array.from(getNeighbors($position, $zoom)) as point (`${point.x},${point.y}`)}
-      <li style={`--color:${getColor(getElevation(point))}`} />
+      <li style={`--color:${getColor(getElevation($getNoise, point))}`} />
     {/each}
   </ol>
 </main>

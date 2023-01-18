@@ -10,3 +10,5 @@ export const ElevationHeightMap: Record<Elevation, number> = {
   [Elevation.Middle]: -0.5,
   [Elevation.Low]: -1,
 };
+
+export type NoiseFunction = (point: Point) => number;
