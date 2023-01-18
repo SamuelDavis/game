@@ -49,6 +49,8 @@
   </label>
 </header>
 
+<hr />
+
 <ol style={`--basis:${basis};`} on:mousemove={onPan}>
   {#each Array.from(getNeighbors($position, $zoom)) as point (`${point.x},${point.y}`)}
     <li style={`--color:${getColor(getElevation(point))}`} />
@@ -56,6 +58,12 @@
 </ol>
 
 <style>
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+  }
+
   ol {
     user-select: none;
     --basis: 0;
