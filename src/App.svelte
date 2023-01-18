@@ -21,14 +21,14 @@
     $zoom += e.deltaY < 0 ? -1 : 1;
   }
 
-  const onPan = debounce(5)((e: MouseEvent) => {
+  const onPan = (e: MouseEvent) => {
     const { buttons, movementX, movementY } = e;
     if (buttons !== 1) return;
     position.update(({ x, y }) => ({
       x: x + -clamp1(movementX),
       y: y + -clamp1(movementY),
     }));
-  });
+  };
 
   function onResetPosition() {
     $position = { x: 0, y: 0 };
@@ -37,25 +37,32 @@
 
 <svelte:window on:wheel={onWheel} />
 
-<header>
-  <label>
-    zoom: <input type="range" bind:value={$zoom} min={zoomMin} max={zoomMax} />
-    <output>{$zoom}</output>
-  </label>
-  <button on:click={onResetPosition}>reset</button>
-  <label>
-    Position:
-    {JSON.stringify($position)}
-  </label>
-</header>
+<main>
+  <header>
+    <label>
+      zoom: <input
+        type="range"
+        bind:value={$zoom}
+        min={zoomMin}
+        max={zoomMax}
+      />
+      <output>{$zoom}</output>
+    </label>
+    <button on:click={onResetPosition}>reset</button>
+    <label>
+      Position:
+      {JSON.stringify($position)}
+    </label>
+  </header>
 
-<hr />
+  <hr />
 
-<ol style={`--basis:${basis};`} on:mousemove={onPan}>
-  {#each Array.from(getNeighbors($position, $zoom)) as point (`${point.x},${point.y}`)}
-    <li style={`--color:${getColor(getElevation(point))}`} />
-  {/each}
-</ol>
+  <ol style={`--basis:${basis};`} on:pointermove={onPan}>
+    {#each Array.from(getNeighbors($position, $zoom)) as point (`${point.x},${point.y}`)}
+      <li style={`--color:${getColor(getElevation(point))}`} />
+    {/each}
+  </ol>
+</main>
 
 <style>
   header {
