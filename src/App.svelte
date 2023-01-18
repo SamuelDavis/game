@@ -31,13 +31,8 @@
 <main>
   <header>
     <label>
-      zoom: <input
-        type="range"
-        bind:value={$zoom}
-        min={zoomMin}
-        max={zoomMax}
-      />
-      <output>{zoomMax - $zoom + 1}</output>
+      zoom: <output>{zoomMax - $zoom + 1}</output>
+      <input type="range" bind:value={$zoom} min={zoomMin} max={zoomMax} />
     </label>
     <span>
       Seed: {@html $seed.replace(/\s/g, "&nbsp;")}
