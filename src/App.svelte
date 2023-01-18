@@ -67,6 +67,7 @@
   }
 
   ol {
+    touch-action: none;
     user-select: none;
     --grid-columns: 0;
     display: grid;
