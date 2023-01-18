@@ -1,20 +1,8 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
-  import type { Point } from "./types";
   import { getColor, getElevation, getNeighbors } from "./generation.js";
-  import { clamp, clamp1, readLocalStorage, writeLocalStorage } from "./util";
-
-  const zoomMax = 20;
-  const zoomMin = 1;
-  const zoom = writable<number>(readLocalStorage("zoom", 1));
-  zoom.subscribe((zoom) => writeLocalStorage("zoom", zoom));
-  const position = writable<Point>(
-    readLocalStorage("position", { x: 0, y: 0 })
-  );
-  position.subscribe((position) => writeLocalStorage("position", position));
-
-  $: basis = $zoom * 2 + 1;
-  $: $zoom = clamp(zoomMin, zoomMax, $zoom);
+  import { clamp1 } from "./util";
+  import { zoomMax, zoomMin } from "./config";
+  import { position, zoom, gridColumns } from "./store";
 
   function onWheel(e: WheelEvent) {
     $zoom += e.deltaY < 0 ? -1 : 1;
@@ -56,7 +44,7 @@
 
   <hr />
 
-  <ol style={`--basis:${basis};`} on:pointermove={onPan}>
+  <ol style={`--grid-columns:${$gridColumns};`} on:pointermove={onPan}>
     {#each Array.from(getNeighbors($position, $zoom)) as point (`${point.x},${point.y}`)}
       <li style={`--color:${getColor(getElevation(point))}`} />
     {/each}
@@ -72,9 +60,9 @@
 
   ol {
     user-select: none;
-    --basis: 0;
+    --grid-columns: 0;
     display: grid;
-    grid-template-columns: repeat(var(--basis), 1fr);
+    grid-template-columns: repeat(var(--grid-columns), 1fr);
 
     list-style-type: none;
     padding: 0;

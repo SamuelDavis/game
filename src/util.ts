@@ -1,13 +1,14 @@
+import type { Writable } from "svelte/store";
+
 export function clamp(min: number, max: number, value: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
 export const clamp1 = clamp.bind(null, -1, 1);
 
-export function readLocalStorage<T>(key: string, def: T): T {
-  return JSON.parse(window.localStorage.getItem(key) ?? JSON.stringify(def));
-}
-
-export function writeLocalStorage<T>(key: string, value: T) {
-  return window.localStorage.setItem(key, JSON.stringify(value));
+export function persistent<U>(store: Writable<U>, key: string) {
+  const initialValue = localStorage.getItem(key);
+  if (initialValue !== null) store.set(JSON.parse(initialValue));
+  store.subscribe((value) => localStorage.setItem(key, JSON.stringify(value)));
+  return store;
 }
