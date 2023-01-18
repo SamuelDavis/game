@@ -17,9 +17,8 @@
     }));
   };
 
-  function onReset() {
-    localStorage.clear();
-    window.location.reload();
+  function onResetPosition() {
+    $position = { x: 0, y: 0 };
   }
 
   function onChangeSeed() {
@@ -47,7 +46,7 @@
     <span>
       Position:
       {JSON.stringify($position)}
-      <button on:click={onReset}>reset</button>
+      <button on:click={onResetPosition}>reset</button>
     </span>
   </header>
 
