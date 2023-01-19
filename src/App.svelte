@@ -1,22 +1,46 @@
 <script lang="ts">
   import { getColor, getNeighbors } from "./generation.js";
-  import { clamp1 } from "./util";
   import { zoomMax, zoomMin } from "./config";
-  import { position, zoom, gridColumns, seed, getCell } from "./store";
+  import {
+    anchor,
+    cellSize,
+    getCell,
+    gridColumns,
+    position,
+    seed,
+    zoom,
+  } from "./store";
   import { prettyPrintCellDescriptor } from "./util.js";
 
   function onWheel(e: WheelEvent) {
     $zoom += e.deltaY < 0 ? -1 : 1;
   }
 
-  const onPan = (e: MouseEvent) => {
-    const { buttons, movementX, movementY } = e;
-    if (buttons !== 1) return;
-    position.update(({ x, y }) => ({
-      x: x + -clamp1(movementX),
-      y: y + -clamp1(movementY),
-    }));
-  };
+  function onPan(e: PointerEvent) {
+    if (!$anchor) return;
+    const {
+      pointer: { x: x1, y: y1 },
+      position: origin,
+    } = $anchor;
+    const { clientX: x2, clientY: y2 } = e;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    $position = {
+      x: Math.floor(origin.x - dx / $cellSize),
+      y: Math.floor(origin.y - dy / $cellSize),
+    };
+  }
+
+  function onSetAnchor(e: PointerEvent) {
+    $anchor = {
+      pointer: { x: e.clientX, y: e.clientY },
+      position: $position,
+    };
+  }
+
+  function onResetAnchor() {
+    $anchor = false;
+  }
 
   function onResetPosition() {
     $position = { x: 0, y: 0 };
@@ -27,7 +51,12 @@
   }
 </script>
 
-<svelte:window on:wheel={onWheel} />
+<svelte:window
+  on:wheel={onWheel}
+  on:pointerup={onResetAnchor}
+  on:blur={onResetAnchor}
+  on:pointermove={onPan}
+/>
 
 <main>
   <header>
@@ -48,7 +77,7 @@
 
   <hr />
 
-  <ol style={`--grid-columns:${$gridColumns};`} on:pointermove={onPan}>
+  <ol style={`--grid-columns:${$gridColumns};`} on:pointerdown={onSetAnchor}>
     {#each Array.from(getNeighbors($position, $zoom)) as point (`${point.x},${point.y}`)}
       <li
         style={`--color:${getColor($getCell(point))};`}

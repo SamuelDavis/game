@@ -30,3 +30,12 @@ export const getCell = derived([seed], ([seed]) => {
     );
   };
 });
+export const cellSize = writable(19.297);
+export const anchor = writable<{ pointer: Point; position: Point } | false>(
+  false
+);
+zoom.subscribe(() => {
+  let firstCell = window.document.querySelector("li");
+  if (!firstCell) return;
+  cellSize.set(parseFloat(window.getComputedStyle(firstCell).width));
+});
