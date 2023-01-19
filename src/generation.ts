@@ -1,5 +1,6 @@
-import type { NoiseFunction, Point } from "./types";
-import { ElevationHeightMap, Elevation } from "./types";
+import type { Cell, HSLString, Point } from "./types";
+import { CellPallet } from "./types";
+import { lerp, normalizeNumber, rgb2h } from "./util";
 
 export function* getNeighbors(point: Point, range = 1) {
   for (let y = point.y - range, maxY = point.y + range; y <= maxY; y++)
@@ -7,19 +8,23 @@ export function* getNeighbors(point: Point, range = 1) {
       yield { x, y };
 }
 
-export function getElevation(getNoise: NoiseFunction, point: Point): Elevation {
-  for (const [key, value] of Object.entries(ElevationHeightMap)) {
-    if (getNoise(point) >= value) return parseInt(key);
-  }
-}
+export function getColor(cell: Cell): HSLString {
+  const height = cell.get("height");
+  const temperature = cell.get("temperature");
+  const humidity = cell.get("humidity");
 
-export function getColor(elevation: Elevation): string {
-  switch (elevation) {
-    case Elevation.High:
-      return "lightgray";
-    case Elevation.Middle:
-      return "forestgreen";
-    case Elevation.Low:
-      return "dodgerblue";
-  }
+  const h = rgb2h(
+    CellPallet.get("Water").map((blue, i) =>
+      lerp(
+        humidity,
+        CellPallet.get("Sand")[i],
+        CellPallet.get("Grass")[i],
+        blue
+      )
+    )
+  );
+  const s = normalizeNumber(temperature, 100);
+  const l = normalizeNumber(lerp(height, 0.3, 0.8), 100);
+
+  return `hsl(${h},${s}%,${l}%)`;
 }

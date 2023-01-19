@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { getColor, getElevation, getNeighbors } from "./generation.js";
+  import { getColor, getNeighbors } from "./generation.js";
   import { clamp1 } from "./util";
   import { zoomMax, zoomMin } from "./config";
-  import { position, zoom, gridColumns, seed, getNoise } from "./store";
+  import { position, zoom, gridColumns, seed, getCell } from "./store";
+  import { prettyPrintCellDescriptor } from "./util.js";
 
   function onWheel(e: WheelEvent) {
     $zoom += e.deltaY < 0 ? -1 : 1;
@@ -49,7 +50,10 @@
 
   <ol style={`--grid-columns:${$gridColumns};`} on:pointermove={onPan}>
     {#each Array.from(getNeighbors($position, $zoom)) as point (`${point.x},${point.y}`)}
-      <li style={`--color:${getColor(getElevation($getNoise, point))}`} />
+      <li
+        style={`--color:${getColor($getCell(point))};`}
+        title={prettyPrintCellDescriptor($getCell(point))}
+      />
     {/each}
   </ol>
 </main>

@@ -1,6 +1,7 @@
 import { derived, writable } from "svelte/store";
-import { persistent } from "./util";
-import type { Point } from "./types";
+import { persistent, unitizeNoise } from "./util";
+import type { Cell, Point } from "./types";
+import { CellDescriptors } from "./types";
 import { zoomMax, zoomMin } from "./config";
 import alea from "alea";
 import { createNoise2D } from "simplex-noise";
@@ -17,9 +18,15 @@ export const seed = persistent(
   writable(Math.random().toString(36).slice(2)),
   "seed"
 );
-export const getNoise = derived([seed], ([seed]) => {
-  const prng = alea(seed);
-  const noise2D = createNoise2D(prng);
-
-  return (point: Point) => noise2D(point.x, point.y);
+export const getCell = derived([seed], ([seed]) => {
+  const noiseGenerators = CellDescriptors.map((descriptor) =>
+    createNoise2D(alea(seed + descriptor))
+  );
+  return function (point: Point) {
+    return noiseGenerators.reduce<Cell>(
+      (acc, getNoise, i) =>
+        acc.set(CellDescriptors[i], unitizeNoise(getNoise(point.x, point.y))),
+      new Map()
+    );
+  };
 });
