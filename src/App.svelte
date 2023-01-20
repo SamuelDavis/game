@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Modal from "./Modal.svelte";
   import { getColor, getNeighbors } from "./generation.js";
   import { zoomMax, zoomMin } from "./config";
   import {
@@ -11,6 +12,8 @@
     zoom,
   } from "./store";
   import { prettyPrintCellDescriptor } from "./util.js";
+  import type { Point } from "./types";
+  import { writable } from "svelte/store";
 
   function onWheel(e: WheelEvent) {
     $zoom += e.deltaY < 0 ? -1 : 1;
@@ -49,6 +52,19 @@
   function onChangeSeed() {
     $seed = prompt("New seed value", $seed) ?? $seed;
   }
+
+  const modal = writable<{ parent: HTMLOListElement; point: Point } | false>(
+    false
+  );
+
+  function onOpenModal(e: PointerEvent, point: Point) {
+    console.log({ e, point });
+    $modal = { parent: e.target as HTMLOListElement, point };
+  }
+
+  function onCloseModal() {
+    $modal = false;
+  }
 </script>
 
 <svelte:window
@@ -56,6 +72,7 @@
   on:pointerup={onResetAnchor}
   on:blur={onResetAnchor}
   on:pointermove={onPan}
+  on:click={onCloseModal}
 />
 
 <main>
@@ -82,10 +99,16 @@
       <li
         style={`--color:${getColor($getCell(point))};`}
         title={prettyPrintCellDescriptor($getCell(point))}
+        on:click|stopPropagation={(e) => onOpenModal(e, point)}
+        on:keydown|stopPropagation={(e) => onOpenModal(e, point)}
       />
     {/each}
   </ol>
 </main>
+
+{#if $modal}
+  <Modal {...$modal} />
+{/if}
 
 <style>
   header {
